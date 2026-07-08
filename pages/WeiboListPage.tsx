@@ -40,7 +40,7 @@ export const WeiboListPage: React.FC = () => {
                 {weibos.map(weibo => (
                     <Card key={weibo.id} className="p-4">
                         <div className="font-bold">{weibo.screenName}</div>
-                        <div className="mt-2 text-gray-700">
+                        <div className="mt-2 text-gray-200">
                             {weibo.text}
                             {weibo.links && weibo.links !== '[]' && (
                                 <div className="mt-1 flex flex-wrap gap-2">
@@ -49,7 +49,7 @@ export const WeiboListPage: React.FC = () => {
                                         const url = link.replace(/[\[\]"']/g, '').trim();
                                         if (!url) return null;
                                         return (
-                                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">
+                                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:underline">
                                                 [链接 {i + 1}]
                                             </a>
                                         );
@@ -69,7 +69,7 @@ export const WeiboListPage: React.FC = () => {
                                 <ImageWithProxy src={fullscreenImage} alt="全屏查看" className="max-w-full max-h-full rounded" />
                             </div>
                         )}
-                        <div className="mt-2 text-sm text-gray-500">
+                        <div className="mt-2 text-sm text-gray-400">
                             {new Date(weibo.createdAt).toLocaleString()} | 转发: {weibo.repostsCount} | 评论: {weibo.commentsCount} | 点赞: {weibo.attitudesCount}
                         </div>
                     </Card>
