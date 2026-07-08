@@ -40,8 +40,8 @@ export const WeiboListPage: React.FC = () => {
                 {weibos.map(weibo => (
                     <Card key={weibo.id} className="p-4">
                         <div className="font-bold">{weibo.screenName}</div>
-                        <div className="mt-2 text-gray-200">
-                            {weibo.text}
+                        <div className="mt-2 text-gray-200 whitespace-pre-wrap">
+                            {weibo.text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')}
                             {weibo.links && weibo.links !== '[]' && (
                                 <div className="mt-1 flex flex-wrap gap-2">
                                     {weibo.links.split(',').map((link, i) => {
