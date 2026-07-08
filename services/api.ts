@@ -1,4 +1,4 @@
-import type { User, Order, ImageEdit, PromptTemplate } from '../types';
+import type { Weibo } from '../types';
 import { API_BASE_URL } from '../constants';
 
 /**
@@ -10,17 +10,30 @@ import { API_BASE_URL } from '../constants';
  * @returns A promise that resolves with the JSON response.
  */
 const apiFetch = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-    const token = localStorage.getItem('token');
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-    };
-
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+    // 处理 hash 路由中的查询参数 (例如 #/weibo?token=123)
+    const hash = window.location.hash;
+    const queryString = hash.includes('?') ? hash.split('?')[1] : '';
+    const urlParams = new URLSearchParams(queryString);
+    const urlToken = urlParams.get('token');
+    const urlUserId = urlParams.get('userId');
+    
+    // 如果 endpoint 不包含查询参数，则添加问号，否则添加 &
+    const separator = endpoint.includes('?') ? '&' : '?';
+    let fullUrl = `${API_BASE_URL}${endpoint}`;
+    
+    if (urlToken) {
+        fullUrl += `${separator}token=${urlToken}`;
+    }
+    if (urlUserId) {
+        fullUrl += `${separator}userId=${urlUserId}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(options.headers as Record<string, string>),
+    };
+
+    const response = await fetch(fullUrl, {
         ...options,
         headers,
     });
@@ -46,115 +59,15 @@ const apiFetch = async <T>(endpoint: string, options: RequestInit = {}): Promise
     return response.json();
 };
 
-type AuthResponse = { token: string; user: Omit<User, 'points'> };
 
-// 1. Send Email Verification Code
-export const sendEmailCode = async (email: string, type: 'REGISTER' = 'REGISTER'): Promise<{ message: string }> => {
-  return apiFetch<{ message: string }>('/email/send-code', {
-    method: 'POST',
-    body: JSON.stringify({ email, type }),
-  });
-};
-
-// 2. User Register
-export const register = async (username: string, password: string, email: string, emailCode: string, turnstileToken: string): Promise<AuthResponse> => {
-  return apiFetch<AuthResponse>('/users/register', {
-    method: 'POST',
-    body: JSON.stringify({ username, password, email, emailCode, turnstileToken }),
-  });
-};
-
-// 3. User Login
-export const login = async (username: string, password: string, turnstileToken: string): Promise<AuthResponse> => {
-  return apiFetch<AuthResponse>('/users/login', {
-    method: 'POST',
-    body: JSON.stringify({ username, password, turnstileToken }),
-  });
-};
-
-// 4. Get User Points
-export const getPoints = async (): Promise<{ points: number }> => {
-  return apiFetch<{ points: number }>('/users/points');
-};
-
-// 5. Create Payment Order
-type CreateOrderResponse = {
-    order: { id: number; amount: number; status: string };
-    stripe: { client_secret: string };
-};
-export const createOrder = async (amount: number, currency: string = 'USD'): Promise<CreateOrderResponse> => {
-  return apiFetch<CreateOrderResponse>('/orders', {
-    method: 'POST',
-    body: JSON.stringify({ amount, currency }),
-  });
-};
-
-// 6. Get prompt templates
-type PromptTemplatesResponse = {
-    templates: PromptTemplate[];
+// 13. Get Weibo Page
+type WeiboPageResponse = {
+    records: Weibo[];
     total: number;
+    size: number;
+    current: number;
 };
-export const getPromptTemplates = async (): Promise<PromptTemplatesResponse> => {
-    return apiFetch<PromptTemplatesResponse>('/prompt/templates');
-};
-
-// 7. Image Edit
-type EditImageResponse = {
-    edit_id: number;
-    result: string;
-    points_remaining: number;
-};
-export const editImage = async (prompt: string, image: string): Promise<EditImageResponse> => {
-  return apiFetch<EditImageResponse>('/image-edits', {
-    method: 'POST',
-    body: JSON.stringify({ prompt, image }),
-  });
-};
-
-// 8. Image Edit by Template
-export const editImageByTemplate = async (templateId: number, image: string): Promise<EditImageResponse> => {
-  return apiFetch<EditImageResponse>('/image-edits/by-template', {
-    method: 'POST',
-    body: JSON.stringify({ templateId: templateId, image }),
-  });
-};
-
-// 9. Get User Order History
-type OrderHistoryResponse = {
-    orders: Order[];
-    total: number;
-};
-export const getOrderHistory = async (): Promise<OrderHistoryResponse> => {
-  return apiFetch<OrderHistoryResponse>('/users/orders');
-};
-
-// 10. Get User Image Edit History
-type EditHistoryResponse = {
-    edits: ImageEdit[];
-    total: number;
-};
-export const getImageEditHistory = async (): Promise<EditHistoryResponse> => {
-  return apiFetch<EditHistoryResponse>('/users/image-edits');
-};
-
-// 11. Change User Password
-export const changePassword = async (oldPassword: string, newPassword: string): Promise<{ message: string }> => {
-  return apiFetch<{ message: string }>('/users/change-password', {
-    method: 'POST',
-    body: JSON.stringify({ oldPassword, newPassword }),
-  });
-};
-
-// 12. Get Exchange Rates
-type ExchangeRatesResponse = {
-  baseCurrency: string;
-  rates: Record<string, number>;
-  lastUpdated: string;
-  source: string;
-  success: boolean;
-  message: string;
-};
-
-export const getExchangeRates = async (): Promise<ExchangeRatesResponse> => {
-  return apiFetch<ExchangeRatesResponse>('/exchange-rates');
+export const getWeiboPage = async (page: number = 1, size: number = 10, userId?: string): Promise<WeiboPageResponse> => {
+    let url = `/weibo/page?page=${page}&size=${size}`;
+    return apiFetch<WeiboPageResponse>(url);
 };

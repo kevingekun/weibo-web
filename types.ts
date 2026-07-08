@@ -32,3 +32,27 @@ export interface PromptTemplate {
   description: string | null;
   createdAt: string | null;
 }
+
+export interface Weibo {
+  id: string;
+  bid: string;
+  userId: string;
+  screenName: string;
+  text: string;
+  articleUrl: string;
+  topics: string;
+  atUsers: string;
+  pics: string;
+  videoUrl: string;
+  livePhotoUrl: string;
+  links: string;
+  location: string;
+  createdAt: string;
+  source: string;
+  attitudesCount: number;
+  commentsCount: number;
+  repostsCount: number;
+  retweetId: string;
+  edited: boolean;
+  editCount: number;
+}
