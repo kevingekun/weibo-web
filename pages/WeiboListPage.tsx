@@ -3,6 +3,7 @@ import { getWeiboPage } from '../services/api';
 import { Weibo } from '../types';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
+import ImageWithProxy from '../components/ImageWithProxy';
 
 export const WeiboListPage: React.FC = () => {
     const [weibos, setWeibos] = useState<Weibo[]>([]);
@@ -59,13 +60,13 @@ export const WeiboListPage: React.FC = () => {
                         {weibo.pics && (
                             <div className="mt-2 flex flex-wrap gap-2">
                                 {weibo.pics.split(',').map((url, i) => (
-                                    <img key={i} src={url} alt={`图片 ${i}`} className="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80" onClick={() => setFullscreenImage(url)} />
+                                    <ImageWithProxy key={i} src={url} alt={`图片 ${i}`} className="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80" onClick={() => setFullscreenImage(url)} />
                                 ))}
                             </div>
                         )}
                         {fullscreenImage && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4" onClick={() => setFullscreenImage(null)}>
-                                <img src={fullscreenImage} alt="全屏查看" className="max-w-full max-h-full rounded" />
+                                <ImageWithProxy src={fullscreenImage} alt="全屏查看" className="max-w-full max-h-full rounded" />
                             </div>
                         )}
                         <div className="mt-2 text-sm text-gray-500">
